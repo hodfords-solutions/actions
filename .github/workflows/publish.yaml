@@ -42,26 +42,23 @@ jobs:
   update-docs:
 #    needs: build
     runs-on: ubuntu-latest
-    container:
-      image: clownfishx/docker:0.4
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: mkdir -p ~/.ssh
-      - run: echo $DOC_SSH_PRIVATE_KEY | base64 -d > ~/.ssh/id_ed25519
+      - name: Set up SSH
         env:
           DOC_SSH_PRIVATE_KEY: ${{ secrets.DOC_SSH_PRIVATE_KEY }}
-      - run: chmod 700 ~/.ssh
-      - run: chmod 400 ~/.ssh/id_ed25519
-      - run: eval $(ssh-agent -s)
-      - run: cat ~/.ssh/id_ed25519
-      - run: ssh-add ~/.ssh/id_ed25519
-      - run: git config --global user.email "actions@github.com"
-      - run: git config --global user.name "GitHub Actions"
+        run: |
+          mkdir -p ~/.ssh
+          echo $DOC_SSH_PRIVATE_KEY | base64 -d > ~/.ssh/id_ed25519
+          chmod 700 ~/.ssh
+          chmod 400 ~/.ssh/id_ed25519
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_ed25519
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
       - name: Clone docs repository
         run: |
           git clone git@github.com:hodfords-solutions/docs.git docs-repo
