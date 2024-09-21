@@ -49,19 +49,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - name: Set up SSH
+      - run: mkdir -p ~/.ssh
+      - run: echo $DOC_SSH_PRIVATE_KEY | base64 -d > ~/.ssh/id_ed25519
         env:
           DOC_SSH_PRIVATE_KEY: ${{ secrets.DOC_SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo $DOC_SSH_PRIVATE_KEY | base64 -d > /root/.ssh/id_ed25519
-          chmod 700 /root/.ssh
-          chmod 400 /root/.ssh/id_ed25519
-          cat /root/.ssh/id_ed25519
-          eval $(ssh-agent -s)
-          ssh-add /root/.ssh/id_ed25519
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
+      - run: chmod 700 ~/.ssh
+      - run: chmod 400 ~/.ssh/id_ed25519
+      - run: eval $(ssh-agent -s)
+      - run: ssh-add ~/.ssh/id_ed25519
+      - run: git config --global user.email "actions@github.com"
+      - run: git config --global user.name "GitHub Actions"
       - name: Clone docs repository
         run: |
           git clone git@github.com:hodfords-solutions/docs.git docs-repo
