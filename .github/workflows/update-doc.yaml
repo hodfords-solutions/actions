@@ -31,7 +31,7 @@ jobs:
           git checkout main
           cd ../
 
-      - name: Update image in values.yaml
+      - name: Update README file
         run: |
           export LIB_NAME=$(node -p "require('./package.json').name.replace('@hodfords/', '')")
           export LIB_FULL_NAME=$(node -p "require('./package.json').name")
@@ -43,9 +43,12 @@ jobs:
         run: |
           export LIB_NAME=$(node -p "require('./package.json').name.replace('@hodfords/', '')")
           cd docs-repo
-          if ! [[ `git status --porcelain` ]]; then
-          echo "Change to docs detected"
-          git add "pages/$LIB_NAME/index.md"
-          git commit -m "Update docs for $LIB_NAME: ${{ github.event.head_commit.message }}"
-          git push
+  
+          export GIT_CHANGE=$(git status --porcelain)
+          if [ -z "$GIT_CHANGE" ]; then
+            echo "No changes"
+          else
+            git add "pages/$LIB_NAME/index.md"
+            git commit -m "Update docs for $LIB_NAME: ${{ github.event.head_commit.message }}"
+            git push
           fi
