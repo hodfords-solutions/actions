@@ -46,9 +46,11 @@ jobs:
         with:
           node-version: '22.x'
       - name: Set up SSH
+        env:
+          DOC_SSH_PRIVATE_KEY: ${{ secrets.DOC_SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo $SSH_PRIVATE_KEY | base64 -d > /root/.ssh/id_ed25519
+          echo $DOC_SSH_PRIVATE_KEY | base64 -d > /root/.ssh/id_ed25519
           chmod 700 /root/.ssh
           chmod 400 /root/.ssh/id_ed25519
           eval $(ssh-agent -s)
