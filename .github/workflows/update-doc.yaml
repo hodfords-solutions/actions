@@ -1,0 +1,50 @@
+name: Update Document
+on:
+  workflow_call:
+    secrets:
+      DOC_SSH_PRIVATE_KEY:
+        required: true
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Set up SSH
+        env:
+          DOC_SSH_PRIVATE_KEY: ${{ secrets.DOC_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo $DOC_SSH_PRIVATE_KEY | base64 -d > ~/.ssh/id_ed25519
+          chmod 700 ~/.ssh
+          chmod 400 ~/.ssh/id_ed25519
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_ed25519
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+      - name: Clone docs repository
+        run: |
+          git clone git@github.com:hodfords-solutions/docs.git docs-repo
+          cd docs-repo
+          git checkout main
+          cd ../
+
+      - name: Update image in values.yaml
+        run: |
+          export LIB_NAME=$(node -p "require('./package.json').name.replace('@hodfords/', '')")
+          export LIB_FULL_NAME=$(node -p "require('./package.json').name")
+          echo -e "---\ndisplayed_sidebar: docs\ntitle: \"$LIB_FULL_NAME\"\n---" | cat - README.md > temp && mv temp README.md
+          cp README.md docs-repo/pages/$LIB_NAME/index.md
+
+      - name: Commit and Push changes
+        shell: sh
+        run: |
+          export LIB_NAME=$(node -p "require('./package.json').name.replace('@hodfords/', '')")
+          cd docs-repo
+          if [[ `git status --porcelain` ]]; then
+          git add "pages/$LIB_NAME//index.md"
+          git commit -m "Update docs for $LIB_NAME: ${{ github.event.head_commit.message }}"
+          git push
+          fi
