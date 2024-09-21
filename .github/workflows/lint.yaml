@@ -1,0 +1,14 @@
+name: NPM lint
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container: node:22
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - run: npm run check
+      - run: npm run lint

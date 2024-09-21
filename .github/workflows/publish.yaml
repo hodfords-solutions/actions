@@ -1,0 +1,45 @@
+name: Build and Publish Library
+on:
+  workflow_call:
+    inputs:
+      package-name:
+        required: true
+        type: string
+      npm-token:
+        required: true
+        type: string
+jobs:
+  check-package:
+    runs-on: ubuntu-latest
+    container: node:22
+    permissions:
+      packages: write
+      contents: read
+    outputs:
+      packageExists: ${{ steps.check.outputs.packageExists }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: npm install
+      - name: Check if package is published
+        run: |
+          if [ "$(npm view ${{ inputs.package-name }}@$(node -p "require('./package.json').version") version)" = "$(node -p "require('./package.json').version")" ]; then
+            echo "packageExists=True" >> $GITHUB_OUTPUT
+          else
+            echo "packageExists=False" >> $GITHUB_OUTPUT
+          fi
+        id: check
+  build:
+    needs: check-package
+    container: node:22
+    if: ${{ needs.check-package.outputs.packageExists == 'False' }}
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - run: npm run build
+      - run: npm publish --access public
