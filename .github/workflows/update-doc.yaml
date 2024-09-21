@@ -44,7 +44,8 @@ jobs:
           export LIB_NAME=$(node -p "require('./package.json').name.replace('@hodfords/', '')")
           cd docs-repo
           if ! [[ `git status --porcelain` ]]; then
-          git add "pages/$LIB_NAME//index.md"
+          echo "Change to docs detected"
+          git add "pages/$LIB_NAME/index.md"
           git commit -m "Update docs for $LIB_NAME: ${{ github.event.head_commit.message }}"
           git push
           fi
