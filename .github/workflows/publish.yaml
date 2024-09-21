@@ -2,7 +2,9 @@ name: Build and Publish Library
 on:
   workflow_call:
     secrets:
-      - DOC_SSH_PRIVATE_KEY
+      DOC_SSH_PRIVATE_KEY:
+        required: true
+        type: string
 jobs:
 #  check-package:
 #    runs-on: ubuntu-latest
