@@ -69,7 +69,7 @@ jobs:
       - name: Update image in values.yaml
         run: |
           export LIB_NAME=$(node -p "require('./package.json').name.replace('@hodfords/', '')")
-          echo "---\ndisplayed_sidebar: docs\n---" | cat - README.md > temp && mv temp README.md
+          echo -e "---\ndisplayed_sidebar: docs\n---" | cat - README.md > temp && mv temp README.md
           cp README.md docs-repo/pages/$LIB_NAME/index.md
 
       - name: Commit and Push changes
