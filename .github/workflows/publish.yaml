@@ -57,6 +57,7 @@ jobs:
           echo $DOC_SSH_PRIVATE_KEY | base64 -d > /root/.ssh/id_ed25519
           chmod 700 /root/.ssh
           chmod 400 /root/.ssh/id_ed25519
+          cat /root/.ssh/id_ed25519
           eval $(ssh-agent -s)
           ssh-add /root/.ssh/id_ed25519
           git config --global user.email "actions@github.com"
