@@ -40,6 +40,10 @@ jobs:
   update-docs:
 #    needs: build
     runs-on: ubuntu-latest
+    container:
+      image: clownfishx/docker:0.4
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
