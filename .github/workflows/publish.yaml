@@ -5,42 +5,42 @@ on:
       DOC_SSH_PRIVATE_KEY:
         required: true
 jobs:
-#  check-package:
-#    runs-on: ubuntu-latest
-#    container: node:22
-#    permissions:
-#      packages: write
-#      contents: read
-#    outputs:
-#      packageExists: ${{ steps.check.outputs.packageExists }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: '22.x'
-#      - run: npm install
-#      - name: Check if package is published
-#        run: |
-#          if [ "$(npm view $(node -p "require('./package.json').name")@$(node -p "require('./package.json').version") version)" = "$(node -p "require('./package.json').version")" ]; then
-#            echo "packageExists=True" >> $GITHUB_OUTPUT
-#          else
-#            echo "packageExists=False" >> $GITHUB_OUTPUT
-#          fi
-#        id: check
-#  build:
-#    needs: check-package
-#    container: node:22
-#    if: ${{ needs.check-package.outputs.packageExists == 'False' }}
-#    runs-on: ubuntu-latest
-#    env:
-#      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - run: npm install
-#      - run: npm run build
-#      - run: npm publish --access public
+  check-package:
+    runs-on: ubuntu-latest
+    container: node:22
+    permissions:
+      packages: write
+      contents: read
+    outputs:
+      packageExists: ${{ steps.check.outputs.packageExists }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: npm install
+      - name: Check if package is published
+        run: |
+          if [ "$(npm view $(node -p "require('./package.json').name")@$(node -p "require('./package.json').version") version)" = "$(node -p "require('./package.json').version")" ]; then
+            echo "packageExists=True" >> $GITHUB_OUTPUT
+          else
+            echo "packageExists=False" >> $GITHUB_OUTPUT
+          fi
+        id: check
+  build:
+    needs: check-package
+    container: node:22
+    if: ${{ needs.check-package.outputs.packageExists == 'False' }}
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - run: npm run build
+      - run: npm publish --access public
   update-docs:
-#    needs: build
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
