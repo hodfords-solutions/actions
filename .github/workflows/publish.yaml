@@ -49,3 +49,4 @@ jobs:
           for i in "${ADDR[@]}"; do
           cd $GITHUB_PATH/$i && npm publish --access public
           done
+        shell: bash
