@@ -45,8 +45,9 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: |
+          export CURRENT_PATH=$(pwd)
           IFS=';' read -ra ADDR <<< "${{ inputs.build_path }}"
           for i in "${ADDR[@]}"; do
-          cd $GITHUB_PATH/$i && npm publish --access public
+          cd $CURRENT_PATH/$i && npm publish --access public
           done
         shell: bash
