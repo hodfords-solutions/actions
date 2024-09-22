@@ -1,6 +1,12 @@
 name: Build and Publish Library
 on:
   workflow_call:
+    inputs:
+      build_path:
+        description: 'Path to the library to build'
+        required: true
+        default: 'build'
+        type: string
     secrets:
       NPM_TOKEN:
         required: true
@@ -38,4 +44,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install
       - run: npm run build
+      - run: cd ${{ inputs.build_path }}
       - run: npm publish --access public
