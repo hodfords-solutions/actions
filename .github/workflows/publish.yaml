@@ -29,7 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: npm install
+      - run: |
+          cd ${{ inputs.package_path }}
+          npm install
       - name: Check if package is published
         run: |
           cd ${{ inputs.package_path }}
