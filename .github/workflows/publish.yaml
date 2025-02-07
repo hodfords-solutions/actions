@@ -50,9 +50,14 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - run: npm install
-      - run: npm run build
       - run: |
+          cd ${{ inputs.package_path }}
+          npm install
+      - run: |
+          cd ${{ inputs.package_path }}
+          npm run build
+      - run: |
+          cd ${{ inputs.package_path }}
           export CURRENT_PATH=$(pwd)
           IFS=';' read -ra ADDR <<< "${{ inputs.build_path }}"
           for i in "${ADDR[@]}"; do
