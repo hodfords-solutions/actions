@@ -38,6 +38,9 @@ jobs:
           echo -e "---\ndisplayed_sidebar: docs\ntitle: \"$LIB_FULL_NAME\"\n---" | cat - README.md > temp && mv temp README.md
           mkdir -p docs-repo/pages/$LIB_NAME
           cp README.md docs-repo/pages/$LIB_NAME/index.md
+          if ! grep -q "$LIB_NAME" docs-repo/.page; then
+            echo "$LIB_NAME\n" >> docs-repo/.page
+          fi
 
       - name: Commit and Push changes
         shell: sh
