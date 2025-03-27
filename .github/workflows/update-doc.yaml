@@ -52,7 +52,7 @@ jobs:
           if [ -z "$GIT_CHANGE" ]; then
             echo "No changes"
           else
-            git add "pages/$LIB_NAME/index.md"
+            git add .
             git commit -m "Update docs for $LIB_NAME: ${{ github.event.head_commit.message }}"
             git push
           fi
