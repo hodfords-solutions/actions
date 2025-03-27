@@ -29,7 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: npm install
+      - run: |
+          cd ${{ inputs.package_path }}
+          npm install
       - name: Check if package is published
         run: |
           cd ${{ inputs.package_path }}
@@ -48,9 +50,14 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - run: npm install
-      - run: npm run build
       - run: |
+          cd ${{ inputs.package_path }}
+          npm install
+      - run: |
+          cd ${{ inputs.package_path }}
+          npm run build
+      - run: |
+          cd ${{ inputs.package_path }}
           export CURRENT_PATH=$(pwd)
           IFS=';' read -ra ADDR <<< "${{ inputs.build_path }}"
           for i in "${ADDR[@]}"; do
