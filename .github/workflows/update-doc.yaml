@@ -39,7 +39,7 @@ jobs:
           mkdir -p docs-repo/pages/$LIB_NAME
           cp README.md docs-repo/pages/$LIB_NAME/index.md
           if ! grep -q "$LIB_NAME" docs-repo/.page; then
-            echo "$LIB_NAME\n" >> docs-repo/.page
+            echo "$LIB_NAME" >> docs-repo/.page
           fi
 
       - name: Commit and Push changes
