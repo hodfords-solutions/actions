@@ -76,6 +76,12 @@ jobs:
         if: inputs.package_manager == 'pnpm'
         with:
           package_json_file: ${{ inputs.package_path }}/package.json
+      - name: Configure registry authentication
+        if: inputs.package_manager == 'pnpm'
+        # pnpm 12 no longer expands ${NODE_AUTH_TOKEN} in a project .npmrc, it just drops the
+        # line, so the token has to be written out. It goes to the home directory rather than
+        # the package directory so it can never end up inside a published tarball.
+        run: printf '//registry.npmjs.org/:_authToken=%s\n' "$NODE_AUTH_TOKEN" > "$HOME/.npmrc"
       - run: |
           cd ${{ inputs.package_path }}
           $PM_INSTALL
