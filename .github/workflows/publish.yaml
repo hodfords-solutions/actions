@@ -12,6 +12,11 @@ on:
         required: false
         default: './'
         type: string
+      package_manager:
+        description: 'Package manager of the calling repository: npm or pnpm'
+        required: false
+        default: 'npm'
+        type: string
     secrets:
       NPM_TOKEN:
         required: true
@@ -24,14 +29,28 @@ jobs:
       contents: read
     outputs:
       packageExists: ${{ steps.check.outputs.packageExists }}
+    env:
+      PM_INSTALL: ${{ inputs.package_manager == 'pnpm' && 'pnpm install --frozen-lockfile' || 'npm install' }}
     steps:
+      - name: Validate inputs
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm|pnpm) ;;
+            *) echo "Unsupported package_manager: '$PACKAGE_MANAGER' (expected 'npm' or 'pnpm')" >&2; exit 1 ;;
+          esac
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
+      - uses: pnpm/action-setup@v4
+        if: inputs.package_manager == 'pnpm'
+        with:
+          package_json_file: ${{ inputs.package_path }}/package.json
       - run: |
           cd ${{ inputs.package_path }}
-          npm install
+          $PM_INSTALL
       - name: Check if package is published
         run: |
           cd ${{ inputs.package_path }}
@@ -48,19 +67,26 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PM_INSTALL: ${{ inputs.package_manager == 'pnpm' && 'pnpm install --frozen-lockfile' || 'npm install' }}
+      PM_RUN: ${{ inputs.package_manager == 'pnpm' && 'pnpm run' || 'npm run' }}
+      PM_PUBLISH: ${{ inputs.package_manager == 'pnpm' && 'pnpm publish --access public --no-git-checks' || 'npm publish --access public' }}
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        if: inputs.package_manager == 'pnpm'
+        with:
+          package_json_file: ${{ inputs.package_path }}/package.json
       - run: |
           cd ${{ inputs.package_path }}
-          npm install
+          $PM_INSTALL
       - run: |
           cd ${{ inputs.package_path }}
-          npm run build
+          $PM_RUN build
       - run: |
           cd ${{ inputs.package_path }}
           export CURRENT_PATH=$(pwd)
           IFS=';' read -ra ADDR <<< "${{ inputs.build_path }}"
           for i in "${ADDR[@]}"; do
-            cd $CURRENT_PATH/$i && npm publish --access public
+            cd $CURRENT_PATH/$i && $PM_PUBLISH
           done
         shell: bash

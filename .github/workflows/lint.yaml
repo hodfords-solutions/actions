@@ -1,13 +1,29 @@
-name: NPM lint
+name: Lint
 
 on:
   workflow_call:
+    inputs:
+      package_manager:
+        description: 'Package manager of the calling repository: npm or pnpm'
+        required: false
+        default: 'npm'
+        type: string
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     container: node:22
     steps:
+      - name: Validate inputs
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package_manager }}
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm|pnpm) ;;
+            *) echo "Unsupported package_manager: '$PACKAGE_MANAGER' (expected 'npm' or 'pnpm')" >&2; exit 1 ;;
+          esac
       - uses: actions/checkout@v4
-      - run: npm install
-      - run: npm run lint
+      - uses: pnpm/action-setup@v4
+        if: inputs.package_manager == 'pnpm'
+      - run: ${{ inputs.package_manager == 'pnpm' && 'pnpm install --frozen-lockfile' || 'npm install' }}
+      - run: ${{ inputs.package_manager == 'pnpm' && 'pnpm' || 'npm' }} run lint
